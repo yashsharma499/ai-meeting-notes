@@ -1,0 +1,11 @@
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+class Config:
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    MONGO_URL = os.getenv("MONGO_URL")   # <-- FIXED
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
