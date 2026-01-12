@@ -1,10 +1,9 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "http://127.0.0.1:5000",
+  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:5000",
   timeout: 30000,
 });
-
 
 axiosClient.interceptors.request.use(
   (config) => {
@@ -18,7 +17,6 @@ axiosClient.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 
 axiosClient.interceptors.response.use(
   (response) => response,
