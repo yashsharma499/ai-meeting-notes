@@ -6,10 +6,6 @@ import unicodedata
 from database.mongo import meetings_collection, actions_collection
 from services.ai_service import run_ai
 
-
-# -----------------------
-# NORMALIZE TEXT (ASCII)
-# -----------------------
 def normalize_text(text: str) -> str:
     if not text:
         return ""
@@ -17,9 +13,6 @@ def normalize_text(text: str) -> str:
     return text.replace("–", "-").replace("—", "-").replace("−", "-")
 
 
-# -----------------------
-# STRICT DEADLINE VALIDATOR (WEEKDAY ONLY)
-# -----------------------
 def validate_deadline(deadline: str, original_notes: str) -> str:
 
     if not deadline or not isinstance(deadline, str):
@@ -29,21 +22,18 @@ def validate_deadline(deadline: str, original_notes: str) -> str:
     notes = normalize_text(original_notes.strip().lower())
     notes_words = notes.split()
 
-    # allowed weekdays only
+    
     weekdays = ["monday", "tuesday", "wednesday", "thursday", 
                 "friday", "saturday", "sunday"]
 
-    # must be EXACT standalone weekday and appear exactly in notes
+    
     if dl in weekdays and dl in notes_words:
         return dl.capitalize()
 
-    # EVERYTHING ELSE IS INVALID
+   
     return ""
 
 
-# -----------------------
-# CREATE MEETING
-# -----------------------
 def create_meeting_service(data, user_id):
     meeting = {
         "notes": data["notes"],
@@ -64,9 +54,6 @@ def create_meeting_service(data, user_id):
     }), 201
 
 
-# -----------------------
-# PROCESS MEETING
-# -----------------------
 def process_meeting_service(data, user_id):
 
     meeting_id = data["meeting_id"]

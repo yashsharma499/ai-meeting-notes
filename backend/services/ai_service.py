@@ -191,7 +191,7 @@ Return ONLY valid JSON.
 """
 
     response = groq_client.chat.completions.create(
-        model="groq/llama3-70b-versatile",
+        model="llama3-70b-versatile",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": USER_PROMPT}
