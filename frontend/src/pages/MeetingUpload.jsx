@@ -77,7 +77,7 @@ export default function MeetingUpload() {
         notes,
       });
 
-      navigate("/summary", { state: { aiResult: processed.data } });
+     navigate("/summary", { state: { meeting_id: meeting.data.meeting_id } });
     } catch (err) {
       console.error(err);
       setAlert({ type: "error", message: "Failed to process insights. Try again." });

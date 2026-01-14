@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  CheckCircle2, 
-  Clock, 
-  User, 
-  Calendar, 
-  Filter, 
-  Edit3, 
-  Save, 
-  X, 
+import {
+  CheckCircle2,
+  Clock,
+  User,
+  Calendar,
+  Filter,
+  Edit3,
+  Save,
+  X,
   Search,
   Flag,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import { getActions, updateAction } from "../api/actionsApi";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -81,44 +81,60 @@ export default function ActionItemsDashboard() {
 
   const getPriorityStyles = (priority) => {
     switch (priority) {
-      case "High": return "bg-red-500/20 text-red-400 border-red-500/40";
-      case "Medium": return "bg-amber-500/20 text-amber-400 border-amber-500/40";
-      case "Low": return "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
-      default: return "bg-gray-500/20 text-gray-400 border-gray-500/40";
+      case "High":
+        return "bg-red-500/20 text-red-400 border-red-500/40";
+      case "Medium":
+        return "bg-amber-500/20 text-amber-400 border-amber-500/40";
+      case "Low":
+        return "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+      default:
+        return "bg-gray-500/20 text-gray-400 border-gray-500/40";
     }
   };
 
   const filteredActions = actions.filter((item) => {
-    const ownerMatch = !filterOwner.trim() || (item.owner || "").toLowerCase().includes(filterOwner.toLowerCase());
-    const priorityMatch = filterPriority === "All" || item.priority === filterPriority;
+    const ownerMatch =
+      !filterOwner.trim() ||
+      (item.owner || "").toLowerCase().includes(filterOwner.toLowerCase());
+    const priorityMatch =
+      filterPriority === "All" || item.priority === filterPriority;
     return ownerMatch && priorityMatch;
   });
 
-  if (loading) return (
-    <div className="h-screen w-full flex items-center justify-center bg-[#0a0a0c]">
-      <LoadingSpinner />
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#0a0a0c]">
+        <LoadingSpinner />
+      </div>
+    );
 
   return (
     <div className="relative min-h-screen w-full bg-[#0a0a0c] text-gray-100 selection:bg-indigo-500/30 p-6 md:p-12 overflow-x-hidden">
-      
       {/* FORCED OVERFLOW FIX */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         body, html { overflow-x: hidden !important; }
-      `}} />
+      `,
+        }}
+      />
 
       {/* --- BRIGHTER BACKGROUND ANIMATIONS --- */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
+        <motion.div
           animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0.7, 0.4] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] rounded-full bg-indigo-600/50 blur-[120px]" 
+          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] rounded-full bg-indigo-600/50 blur-[120px]"
         />
-        <motion.div 
+        <motion.div
           animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute -bottom-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-purple-700/40 blur-[120px]" 
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+          className="absolute -bottom-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-purple-700/40 blur-[120px]"
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50%] h-[50%] bg-blue-600/10 blur-[140px] opacity-60" />
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
@@ -133,22 +149,30 @@ export default function ActionItemsDashboard() {
             transition={{ duration: 0.6 }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-200 text-xs font-bold uppercase tracking-widest mb-4">
-               <Sparkles size={14} /> Task Management
+              <Sparkles size={14} /> Task Management
             </div>
             <h1 className="text-5xl font-black tracking-tighter text-white mb-2">
-              Action <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-200 via-purple-300 to-pink-300">Items</span>
+              Action{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-200 via-purple-300 to-pink-300">
+                Items
+              </span>
             </h1>
-            <p className="text-gray-400 font-medium">Manage and track your meeting outcomes.</p>
+            <p className="text-gray-400 font-medium">
+              Manage and track your meeting outcomes.
+            </p>
           </motion.div>
 
           {/* FILTERS BAR */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-wrap gap-4 p-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl"
           >
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Filter by owner..."
@@ -165,17 +189,29 @@ export default function ActionItemsDashboard() {
                 value={filterPriority}
                 onChange={(e) => setFilterPriority(e.target.value)}
               >
-                <option className="bg-[#1a1a1c]" value="All">All Priorities</option>
-                <option className="bg-[#1a1a1c]" value="High">High</option>
-                <option className="bg-[#1a1a1c]" value="Medium">Medium</option>
-                <option className="bg-[#1a1a1c]" value="Low">Low</option>
+                <option className="bg-[#1a1a1c]" value="All">
+                  All Priorities
+                </option>
+                <option className="bg-[#1a1a1c]" value="High">
+                  High
+                </option>
+                <option className="bg-[#1a1a1c]" value="Medium">
+                  Medium
+                </option>
+                <option className="bg-[#1a1a1c]" value="Low">
+                  Low
+                </option>
               </select>
             </div>
           </motion.div>
         </div>
 
         {alert && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
             <Alert type={alert.type} message={alert.message} />
           </motion.div>
         )}
@@ -207,12 +243,22 @@ export default function ActionItemsDashboard() {
                       onChange={(e) => setEditOwner(e.target.value)}
                       placeholder="Owner Name"
                     />
-                    <input
-                      type="date"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                      value={editDeadline}
-                      onChange={(e) => setEditDeadline(e.target.value)}
-                    />
+                    {/^\d{4}-\d{2}-\d{2}$/.test(editDeadline) ? (
+                      <input
+                        type="date"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={editDeadline}
+                        onChange={(e) => setEditDeadline(e.target.value)}
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={editDeadline}
+                        placeholder="Enter deadline (e.g., Friday)"
+                        onChange={(e) => setEditDeadline(e.target.value)}
+                      />
+                    )}
                     <select
                       className="w-full bg-[#1a1a1c] border border-white/10 rounded-xl p-3 text-sm outline-none"
                       value={editPriority}
@@ -223,10 +269,16 @@ export default function ActionItemsDashboard() {
                       <option value="Low">Low Priority</option>
                     </select>
                     <div className="flex gap-2 pt-2">
-                      <button onClick={saveEdit} className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:brightness-110 py-3 rounded-xl text-sm font-black flex items-center justify-center gap-2 shadow-lg">
+                      <button
+                        onClick={saveEdit}
+                        className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:brightness-110 py-3 rounded-xl text-sm font-black flex items-center justify-center gap-2 shadow-lg"
+                      >
                         <Save size={16} /> Save
                       </button>
-                      <button onClick={() => setEditingId(null)} className="px-5 bg-white/10 hover:bg-white/20 py-3 rounded-xl text-sm font-bold">
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="px-5 bg-white/10 hover:bg-white/20 py-3 rounded-xl text-sm font-bold"
+                      >
                         <X size={16} />
                       </button>
                     </div>
@@ -236,17 +288,21 @@ export default function ActionItemsDashboard() {
                   <>
                     <div className="flex-grow">
                       <div className="flex justify-between items-start mb-6">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${getPriorityStyles(item.priority)}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${getPriorityStyles(
+                            item.priority
+                          )}`}
+                        >
                           {item.priority}
                         </span>
-                        <button 
+                        <button
                           onClick={() => startEdit(item)}
                           className="opacity-0 group-hover:opacity-100 p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/10"
                         >
                           <Edit3 size={16} className="text-gray-300" />
                         </button>
                       </div>
-                      
+
                       <h3 className="text-xl font-bold text-white leading-tight mb-6 group-hover:text-indigo-200 transition-colors">
                         {item.task}
                       </h3>
@@ -267,7 +323,10 @@ export default function ActionItemsDashboard() {
                       <div className="flex items-center gap-3">
                         {item.status === "Done" ? (
                           <div className="bg-emerald-500/20 p-1.5 rounded-lg border border-emerald-500/30">
-                            <CheckCircle2 size={18} className="text-emerald-400" />
+                            <CheckCircle2
+                              size={18}
+                              className="text-emerald-400"
+                            />
                           </div>
                         ) : (
                           <div className="bg-amber-500/20 p-1.5 rounded-lg border border-amber-500/30">
@@ -276,12 +335,20 @@ export default function ActionItemsDashboard() {
                         )}
                         <select
                           value={item.status}
-                          onChange={(e) => handleStatusChange(item._id, e.target.value)}
+                          onChange={(e) =>
+                            handleStatusChange(item._id, e.target.value)
+                          }
                           className="bg-transparent text-sm font-black tracking-wide focus:outline-none cursor-pointer text-gray-200 hover:text-indigo-300 transition-colors"
                         >
-                          <option className="bg-[#1a1a1c]" value="Pending">Pending</option>
-                          <option className="bg-[#1a1a1c]" value="In Progress">In Progress</option>
-                          <option className="bg-[#1a1a1c]" value="Done">Done</option>
+                          <option className="bg-[#1a1a1c]" value="Pending">
+                            Pending
+                          </option>
+                          <option className="bg-[#1a1a1c]" value="In Progress">
+                            In Progress
+                          </option>
+                          <option className="bg-[#1a1a1c]" value="Done">
+                            Done
+                          </option>
                         </select>
                       </div>
                     </div>
@@ -293,18 +360,18 @@ export default function ActionItemsDashboard() {
         </div>
 
         {filteredActions.length === 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center py-24 bg-white/[0.02] border border-dashed border-white/10 rounded-[3rem]"
           >
             <Flag size={54} className="text-gray-700 mb-6" />
-            <p className="text-gray-400 text-xl font-bold italic">No matching action items found.</p>
+            <p className="text-gray-400 text-xl font-bold italic">
+              No matching action items found.
+            </p>
           </motion.div>
         )}
       </div>
     </div>
   );
 }
-
-

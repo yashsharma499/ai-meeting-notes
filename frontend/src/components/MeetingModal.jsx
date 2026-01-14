@@ -1,15 +1,14 @@
-
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  X, 
-  Users, 
-  FileText, 
-  CheckSquare, 
-  Lightbulb, 
+import {
+  X,
+  Users,
+  FileText,
+  CheckSquare,
+  Lightbulb,
   ArrowRight,
   Calendar,
-  User 
+  User,
 } from "lucide-react";
 
 export default function MeetingModal({ meeting, onClose }) {
@@ -18,20 +17,13 @@ export default function MeetingModal({ meeting, onClose }) {
   const handleViewFullSummary = () => {
     navigate("/summary", {
       state: {
-        aiResult: {
-          summary: typeof meeting.summary === "string" && meeting.summary.trim().length > 0 
-            ? meeting.summary 
-            : "No summary available",
-          key_decisions: Array.isArray(meeting.key_decisions) ? meeting.key_decisions : [],
-          action_items: Array.isArray(meeting.action_items) ? meeting.action_items : [],
-        },
+        meeting_id: meeting._id,
       },
     });
   };
 
   const hasSummary =
-    typeof meeting.summary === "string" &&
-    meeting.summary.trim().length > 0;
+    typeof meeting.summary === "string" && meeting.summary.trim().length > 0;
 
   return (
     <motion.div
@@ -48,7 +40,6 @@ export default function MeetingModal({ meeting, onClose }) {
         className="relative w-full max-w-2xl backdrop-blur-3xl bg-white/[0.06] border border-white/[0.12] rounded-[2.5rem] shadow-2xl p-8 md:p-10 overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        
         {/* CLOSE BUTTON */}
         <button
           className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all z-20"
@@ -71,7 +62,7 @@ export default function MeetingModal({ meeting, onClose }) {
             <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
               <Users size={16} className="text-purple-400" />
               <span>
-                {(meeting.participants || []).length > 0 
+                {(meeting.participants || []).length > 0
                   ? meeting.participants.join(", ")
                   : "Internal Team"}
               </span>
@@ -81,13 +72,13 @@ export default function MeetingModal({ meeting, onClose }) {
 
         {/* CONTENT AREA */}
         <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar space-y-8 relative z-10">
-
           {hasSummary ? (
             <>
               {/* SUMMARY SECTION */}
               <section>
                 <h3 className="flex items-center gap-2 text-sm font-black text-gray-200 uppercase tracking-widest mb-4">
-                  <FileText size={18} className="text-blue-400" /> AI Executive Summary
+                  <FileText size={18} className="text-blue-400" /> AI Executive
+                  Summary
                 </h3>
 
                 <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
@@ -100,10 +91,12 @@ export default function MeetingModal({ meeting, onClose }) {
               {/* KEY DECISIONS */}
               <section>
                 <h3 className="flex items-center gap-2 text-sm font-black text-gray-200 uppercase tracking-widest mb-4">
-                  <Lightbulb size={18} className="text-amber-400" /> Key Decisions
+                  <Lightbulb size={18} className="text-amber-400" /> Key
+                  Decisions
                 </h3>
 
-                {Array.isArray(meeting.key_decisions) && meeting.key_decisions.length > 0 ? (
+                {Array.isArray(meeting.key_decisions) &&
+                meeting.key_decisions.length > 0 ? (
                   <div className="grid gap-3">
                     {meeting.key_decisions.map((d, i) => (
                       <div
@@ -118,24 +111,30 @@ export default function MeetingModal({ meeting, onClose }) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 italic px-4">No decisions recorded.</p>
+                  <p className="text-gray-500 italic px-4">
+                    No decisions recorded.
+                  </p>
                 )}
               </section>
 
               {/* ACTION ITEMS */}
               <section>
                 <h3 className="flex items-center gap-2 text-sm font-black text-gray-200 uppercase tracking-widest mb-4">
-                  <CheckSquare size={18} className="text-emerald-400" /> Action Items
+                  <CheckSquare size={18} className="text-emerald-400" /> Action
+                  Items
                 </h3>
 
-                {Array.isArray(meeting.action_items) && meeting.action_items.length > 0 ? (
+                {Array.isArray(meeting.action_items) &&
+                meeting.action_items.length > 0 ? (
                   <div className="grid gap-3">
                     {meeting.action_items.map((item, i) => (
                       <div
                         key={i}
                         className="bg-white/5 border border-white/5 p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4"
                       >
-                        <span className="text-white font-bold text-base">{item.task}</span>
+                        <span className="text-white font-bold text-base">
+                          {item.task}
+                        </span>
 
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 rounded-lg text-xs font-bold text-indigo-300 border border-indigo-500/20">
@@ -146,14 +145,20 @@ export default function MeetingModal({ meeting, onClose }) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 italic px-4">No tasks extracted.</p>
+                  <p className="text-gray-500 italic px-4">
+                    No tasks extracted.
+                  </p>
                 )}
               </section>
             </>
           ) : (
             <div className="text-center py-10 opacity-60 text-gray-400">
-              <p className="text-lg font-semibold mb-2">No AI Summary Available</p>
-              <p className="text-sm">This meeting did not generate valid AI output.</p>
+              <p className="text-lg font-semibold mb-2">
+                No AI Summary Available
+              </p>
+              <p className="text-sm">
+                This meeting did not generate valid AI output.
+              </p>
             </div>
           )}
         </div>
@@ -167,7 +172,6 @@ export default function MeetingModal({ meeting, onClose }) {
             Open Interactive Summary <ArrowRight size={20} />
           </button>
         </div>
-
       </motion.div>
     </motion.div>
   );
