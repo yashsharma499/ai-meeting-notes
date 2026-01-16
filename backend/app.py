@@ -10,12 +10,11 @@ from routes.action_routes import action_bp
 from routes.auth_routes import auth_bp
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+from database.mongo import client as mongo_client
 
 load_dotenv()
 
 try:
-    mongo_url = os.getenv("MONGO_URL")
-    mongo_client = MongoClient(mongo_url, serverSelectionTimeoutMS=3000)
     mongo_client.admin.command("ping")
     print("MongoDB Connected Successfully")
 except ConnectionFailure as e:
