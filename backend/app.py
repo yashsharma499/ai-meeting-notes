@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
-
+import traceback
 from routes.meeting_routes import meeting_bp
 from routes.action_routes import action_bp
 from routes.auth_routes import auth_bp
@@ -37,6 +37,12 @@ app.register_blueprint(auth_bp)
 def home():
     return {"message": "Flask backend running"}
 
+@app.errorhandler(Exception)
+def handle_global_error(e):
+    print("GLOBAL ERROR:", str(e))
+    traceback.print_exc()
+    return {"error": "Internal server error"}, 500 
+    
 if __name__ == "__main__":
     debug_mode = os.getenv("DEBUG", "False") == "True"
     app.run(debug=debug_mode)
