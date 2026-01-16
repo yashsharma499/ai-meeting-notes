@@ -13,7 +13,12 @@ load_dotenv()
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+ALLOWED_ORIGINS = [
+    "https://ai-meeting-notes-zeta.vercel.app",
+    "http://localhost:5173"
+]
+
+CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}})
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
