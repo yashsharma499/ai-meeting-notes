@@ -27,4 +27,5 @@ def home():
     return {"message": "Flask backend running"}
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.getenv("DEBUG", "False") == "True"
+    app.run(debug=debug_mode)
