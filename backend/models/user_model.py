@@ -3,9 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import traceback
 
-client = MongoClient(os.getenv("MONGO_URL"))
-db = client["ai_meeting_app"]
-users = db["users"]
+from database.mongo import users_collection
 
 def create_user(name, email, password):
     try:
@@ -15,7 +13,7 @@ def create_user(name, email, password):
             "email": email,
             "password": hashed
         }
-        users.insert_one(user)
+        users_collection.insert_one(user)
         return user
     except Exception as e:
         print("ERROR in create_user:", str(e))
@@ -25,7 +23,7 @@ def create_user(name, email, password):
 
 def get_user_by_email(email):
     try:
-        return users.find_one({"email": email})
+        return users_collection.find_one({"email": email})
     except Exception as e:
         print("ERROR in get_user_by_email:", str(e))
         traceback.print_exc()
