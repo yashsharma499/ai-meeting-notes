@@ -6,29 +6,72 @@ const axiosClient = axios.create({
   timeout: 30000,
 });
 
+// Helper to refresh access token
+const refreshAccessToken = async () => {
+  const refreshToken = localStorage.getItem("refresh_token");
+
+  if (!refreshToken) return null;
+
+  try {
+    const decoded = jwtDecode(refreshToken);
+
+    // Check if refresh token expired
+    if (Date.now() >= decoded.exp * 1000) {
+      console.warn("Refresh token expired, logging out...");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("access_token");
+      window.location.href = "/login";
+      return null;
+    }
+
+    // Call backend refresh endpoint
+    const res = await axios.post(
+      "/auth/refresh",
+      {},
+      {
+        baseURL: import.meta.env.VITE_API_URL,
+        headers: { Authorization: `Bearer ${refreshToken}` },
+      }
+    );
+
+    const newAccessToken = res.data.access_token;
+
+    localStorage.setItem("access_token", newAccessToken);
+
+    return newAccessToken;
+  } catch (err) {
+    console.error("Refresh token invalid", err);
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("access_token");
+    window.location.href = "/login";
+    return null;
+  }
+};
+
 axiosClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
+  async (config) => {
+    let accessToken = localStorage.getItem("access_token");
 
-    if (token) {
+    if (accessToken) {
       try {
-      
-        const { exp } = jwtDecode(token);
+        const { exp } = jwtDecode(accessToken);
 
+        // If access token expired → refresh it
         if (Date.now() >= exp * 1000) {
-          console.warn("Token expired. Logging out...");
-          localStorage.removeItem("token");
-          window.location.href = "/login";
-          return Promise.reject("Token expired");
+          console.warn("Access token expired → refreshing...");
+
+          accessToken = await refreshAccessToken();
+
+          if (!accessToken) return Promise.reject("Unable to refresh access token");
         }
 
-        
-        config.headers.Authorization = `Bearer ${token}`;
+        // Attach valid or newly refreshed token
+        config.headers.Authorization = `Bearer ${accessToken}`;
       } catch (err) {
-        console.error("Invalid JWT format", err);
-        localStorage.removeItem("token");
+        console.error("Invalid access token", err);
+        localStorage.removeItem("access_token");
         window.location.href = "/login";
-        return Promise.reject("Invalid token");
+        return Promise.reject("Invalid access token");
       }
     }
 
@@ -37,15 +80,27 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-
 axiosClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    // If backend returns 401, try refreshing token again
     if (error.response?.status === 401) {
-      console.warn("Token expired or unauthorized (401). Redirecting to login...");
-      localStorage.removeItem("token");
+      console.warn("Received 401 → Attempting refresh");
+
+      const newAccess = await refreshAccessToken();
+
+      if (newAccess) {
+        // Retry original request with new access token
+        error.config.headers.Authorization = `Bearer ${newAccess}`;
+        return axiosClient(error.config);
+      }
+
+      // If refresh fails → logout
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
       window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );
