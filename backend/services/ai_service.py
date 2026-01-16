@@ -188,7 +188,7 @@ Return ONLY valid JSON.
 """
 
     response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=Config.GROQ_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": USER_PROMPT}
