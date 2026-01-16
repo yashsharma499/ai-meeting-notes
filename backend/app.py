@@ -20,8 +20,14 @@ ALLOWED_ORIGINS = [
 
 CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}})
 
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+jwt_secret = os.getenv("JWT_SECRET_KEY")
+
+if not jwt_secret or len(jwt_secret) < 16:
+    raise ValueError("ERROR: Invalid or missing JWT_SECRET_KEY. Please set a secure key in the environment variables.")
+
+app.config["JWT_SECRET_KEY"] = jwt_secret
 jwt = JWTManager(app)
+
 
 app.register_blueprint(meeting_bp)
 app.register_blueprint(action_bp)
