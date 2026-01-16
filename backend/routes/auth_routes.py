@@ -8,7 +8,7 @@ auth_bp = Blueprint("auth_routes", __name__)
 class SignupSchema(BaseModel):
     name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr
-    password: str = Field(..., min_length=6)
+    password: str = Field(..., min_length=8)
 
 class LoginSchema(BaseModel):
     email: EmailStr
@@ -25,6 +25,14 @@ def signup_route():
     name = data["name"].strip()
     email = data["email"].lower().strip()
     password = data["password"].strip()
+
+
+    import re
+    password_pattern = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+    if not re.match(password_pattern, password):
+        return jsonify({
+            "message": "Password must contain at least 8 characters, including uppercase, lowercase, and numbers."
+        }), 400
 
     if get_user_by_email(email):
         return jsonify({"message": "User already exists"}), 400
