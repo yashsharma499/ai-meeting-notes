@@ -61,7 +61,7 @@ def process_meeting_service(data, user_id):
         # Run AI processing
         parsed = run_ai(notes)
 
-        # STEP 1 — Reset fields
+        # STEP 1 — Reset fields in meeting document
         meetings_collection.update_one(
             {"_id": ObjectId(meeting_id)},
             {"$set": {
@@ -71,7 +71,7 @@ def process_meeting_service(data, user_id):
             }}
         )
 
-        # STEP 2 — Validate action items
+        # STEP 2 — Validate and clean action items
         cleaned_items = []
         for item in parsed["action_items"]:
             raw_dl = normalize_text(item.get("deadline", "").strip())
@@ -84,27 +84,48 @@ def process_meeting_service(data, user_id):
                 "deadline": final_dl
             })
 
-        # SAVE CLEANED ITEMS
+        # Save cleaned items to meeting document
         meetings_collection.update_one(
             {"_id": ObjectId(meeting_id)},
             {"$set": {"action_items": cleaned_items}}
         )
 
-        # STEP 3 — Replace actions collection
-        actions_collection.delete_many({"meeting_id": ObjectId(meeting_id)})
+        # STEP 3 — SAFELY UPDATE ACTION ITEMS in actions_collection
+        existing_items = list(actions_collection.find({"meeting_id": ObjectId(meeting_id)}))
+        existing_lookup = {item["task"].lower(): item for item in existing_items}
 
         for item in cleaned_items:
-            actions_collection.insert_one({
-                "meeting_id": ObjectId(meeting_id),
-                "task": item["task"],
-                "owner": item["owner"],
-                "priority": item["priority"],
-                "deadline": item["deadline"],
-                "status": "Pending",
-                "created_at": datetime.utcnow().isoformat(),
-                "user_id": user_id
-            })
+            task_key = item["task"].lower()
 
+            if task_key in existing_lookup:
+                # UPDATE existing item
+                actions_collection.update_one(
+                    {"_id": existing_lookup[task_key]["_id"]},
+                    {"$set": {
+                        "owner": item["owner"],
+                        "priority": item["priority"],
+                        "deadline": item["deadline"]
+                    }}
+                )
+                existing_lookup.pop(task_key)
+            else:
+                # INSERT new item
+                actions_collection.insert_one({
+                    "meeting_id": ObjectId(meeting_id),
+                    "task": item["task"],
+                    "owner": item["owner"],
+                    "priority": item["priority"],
+                    "deadline": item["deadline"],
+                    "status": "Pending",
+                    "created_at": datetime.utcnow().isoformat(),
+                    "user_id": user_id
+                })
+
+        # DELETE items no longer present
+        for leftover in existing_lookup.values():
+            actions_collection.delete_one({"_id": leftover["_id"]})
+
+        # RETURN response to frontend
         return jsonify({
             "summary": parsed["summary"],
             "key_decisions": parsed["key_decisions"],
