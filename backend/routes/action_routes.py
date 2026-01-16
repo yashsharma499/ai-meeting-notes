@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.action_service import update_action_service
 from database.mongo import actions_collection
@@ -16,12 +16,30 @@ class UpdateActionSchema(BaseModel):
 def get_actions_route():
     user_id = get_jwt_identity()
 
-    actions = list(actions_collection.find({"user_id": user_id}))
+    # Read pagination params
+    page = int(request.args.get("page", 1))
+    limit = int(request.args.get("limit", 10))
+    skip = (page - 1) * limit
+
+    # Query with pagination
+    cursor = actions_collection.find({"user_id": user_id}).skip(skip).limit(limit)
+    actions = list(cursor)
+
+    # Convert ObjectId fields to strings
     for a in actions:
         a["_id"] = str(a["_id"])
         a["meeting_id"] = str(a["meeting_id"])
 
-    return actions, 200
+    # Count total actions
+    total = actions_collection.count_documents({"user_id": user_id})
+
+    return {
+        "data": actions,
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "total_pages": (total + limit - 1) // limit
+    }, 200
 
 @action_bp.patch("/actions/<action_id>")
 @jwt_required()
