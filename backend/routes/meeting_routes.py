@@ -1,6 +1,7 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.meeting_service import create_meeting_service, process_meeting_service
+from database.mongo import meetings_collection
 from pydantic import BaseModel, Field, ValidationError
 
 meeting_bp = Blueprint("meeting_routes", __name__)
@@ -10,7 +11,8 @@ class CreateMeetingSchema(BaseModel):
     notes: str = Field(..., min_length=1)
 
 class ProcessMeetingSchema(BaseModel):
-    content: str = Field(..., min_length=5)
+    meeting_id: str = Field(..., min_length=5)
+    notes: str = Field(..., min_length=5)
 
 @meeting_bp.post("/meetings/create")
 @jwt_required()
@@ -33,18 +35,17 @@ def process_meeting_route():
     return process_meeting_service(body.model_dump(), get_jwt_identity())
 
 @meeting_bp.get("/meetings")
+@jwt_required()
 def get_meetings():
     user_id = get_jwt_identity()
 
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
-
     skip = (page - 1) * limit
 
     cursor = meetings_collection.find({"user_id": user_id}).skip(skip).limit(limit)
     meetings = list(cursor)
 
-    # Convert ObjectId to string
     for m in meetings:
         m["_id"] = str(m["_id"])
 
