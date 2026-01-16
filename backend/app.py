@@ -13,8 +13,23 @@ from pymongo.errors import ConnectionFailure
 from database.mongo import client as mongo_client
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from config import Config
 
 load_dotenv()
+
+def validate_config():
+    required_keys = [
+        "GROQ_API_KEY",
+        "MONGO_URL",
+        "JWT_SECRET_KEY"
+    ]
+
+    for key in required_keys:
+        value = getattr(Config, key, None)
+        if not value:
+            raise RuntimeError(f"❌ Missing required configuration: {key}")
+
+validate_config()
 
 try:
     mongo_client.admin.command("ping")
