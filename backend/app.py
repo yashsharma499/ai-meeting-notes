@@ -11,6 +11,8 @@ from routes.auth_routes import auth_bp
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from database.mongo import client as mongo_client
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 load_dotenv()
 
@@ -22,6 +24,12 @@ except ConnectionFailure as e:
     raise SystemExit("Cannot start server without MongoDB connection")
 
 app = Flask(__name__)
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["100 per hour"]  # global rate limit
+)
 
 ALLOWED_ORIGINS = [
     "https://ai-meeting-notes-zeta.vercel.app",
