@@ -33,13 +33,27 @@ def process_meeting_route():
     return process_meeting_service(body.model_dump(), get_jwt_identity())
 
 @meeting_bp.get("/meetings")
-@jwt_required()
-def get_meetings_route():
-    from database.mongo import meetings_collection
+def get_meetings():
     user_id = get_jwt_identity()
 
-    meetings = list(meetings_collection.find({"user_id": user_id}))
+    page = int(request.args.get("page", 1))
+    limit = int(request.args.get("limit", 10))
+
+    skip = (page - 1) * limit
+
+    cursor = meetings_collection.find({"user_id": user_id}).skip(skip).limit(limit)
+    meetings = list(cursor)
+
+    # Convert ObjectId to string
     for m in meetings:
         m["_id"] = str(m["_id"])
 
-    return meetings, 200
+    total = meetings_collection.count_documents({"user_id": user_id})
+
+    return jsonify({
+        "data": meetings,
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "total_pages": (total + limit - 1) // limit
+    }), 200
