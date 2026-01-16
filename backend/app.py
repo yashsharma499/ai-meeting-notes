@@ -8,8 +8,19 @@ import traceback
 from routes.meeting_routes import meeting_bp
 from routes.action_routes import action_bp
 from routes.auth_routes import auth_bp
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
 load_dotenv()
+
+try:
+    mongo_url = os.getenv("MONGO_URL")
+    mongo_client = MongoClient(mongo_url, serverSelectionTimeoutMS=3000)
+    mongo_client.admin.command("ping")
+    print("MongoDB Connected Successfully")
+except ConnectionFailure as e:
+    print("ERROR: MongoDB connection failed:", str(e))
+    raise SystemExit("Cannot start server without MongoDB connection")
 
 app = Flask(__name__)
 
@@ -42,7 +53,7 @@ def handle_global_error(e):
     print("GLOBAL ERROR:", str(e))
     traceback.print_exc()
     return {"error": "Internal server error"}, 500 
-    
+
 if __name__ == "__main__":
     debug_mode = os.getenv("DEBUG", "False") == "True"
     app.run(debug=debug_mode)
