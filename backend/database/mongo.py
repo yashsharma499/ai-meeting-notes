@@ -19,6 +19,7 @@ users_collection = db["users"]
 meetings_collection = db["meetings"]
 actions_collection = db["actions"]
 
+
 users_collection.create_index("email", unique=True)
 meetings_collection.create_index("user_id")
 actions_collection.create_index("user_id")
