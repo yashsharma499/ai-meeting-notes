@@ -6,12 +6,8 @@ import traceback
 
 from database.mongo import meetings_collection, actions_collection
 from services.ai_service import run_ai
+from services.utils.text_utils import normalize_text
 
-def normalize_text(text: str) -> str:
-    if not text:
-        return ""
-    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
-    return text.replace("–", "-").replace("—", "-").replace("−", "-")
 
 
 def validate_deadline(deadline: str, original_notes: str) -> str:
