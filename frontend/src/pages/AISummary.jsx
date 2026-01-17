@@ -9,28 +9,42 @@ import SummaryHeader from "../components/AISummary/SummaryHeader";
 import SummarySection from "../components/AISummary/SummarySection";
 import DecisionsSection from "../components/AISummary/DecisionsSection";
 import ActionItemsSection from "../components/AISummary/ActionItemsSection";
+import { useAppStore } from "../store/useAppStore";
 
 export default function AISummary() {
   const location = useLocation();
   const meetingId = location.state?.meeting_id;
+  
 
+  const meetings = useAppStore((s) => s.meetings);
+  const setMeetings = useAppStore((s) => s.setMeetings);
   const [aiResult, setAiResult] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchMeeting() {
+    async function loadMeeting() {
       try {
-        const res = await getMeetings();
-        const meeting = res.data.find(m => m._id === meetingId);
-        if (meeting) setAiResult(meeting);
+        
+        if (meetings.length > 0) {
+          const meeting = meetings.find((m) => m._id === meetingId);
+          setAiResult(meeting || null);
+        } 
+        
+        else {
+          const res = await getMeetings();
+          setMeetings(res.data);
+          const meeting = res.data.find((m) => m._id === meetingId);
+          setAiResult(meeting || null);
+        }
       } catch (err) {
         console.error("Error loading meeting:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
-    meetingId ? fetchMeeting() : setLoading(false);
-  }, [meetingId]);
+    meetingId ? loadMeeting() : setLoading(false);
+  }, [meetingId, meetings, setMeetings]);
 
   const getPriorityStyles = (priority) => {
     switch (priority) {

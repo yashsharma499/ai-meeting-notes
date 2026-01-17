@@ -8,9 +8,11 @@ import MeetingCard from "../components/MeetingHistory/MeetingCard";
 import EmptyState from "../components/MeetingHistory/EmptyState";
 import MeetingModal from "../components/MeetingModal";
 import Alert from "../components/Alert";
+import { useAppStore } from "../store/useAppStore";
 
 export default function MeetingHistory() {
-  const [meetings, setMeetings] = useState([]);
+  const meetings = useAppStore((s) => s.meetings);
+  const setMeetings = useAppStore((s) => s.setMeetings);
   const [loading, setLoading] = useState(true);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
 
@@ -21,17 +23,20 @@ export default function MeetingHistory() {
   const [alert, setAlert] = useState(null);
 
   const fetchMeetings = async () => {
-    try {
-      const res = await getMeetings();
-      const sorted = res.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      setMeetings(sorted);
-    } catch (err) {
-      console.error("Error loading meetings:", err);
-      setAlert({ type: "error", message: "Failed to load meetings. Please try again." });
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const res = await getMeetings();
+
+    const sorted = res.data.sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    setMeetings(sorted);
+  } catch (err) {
+    setAlert({ type: "error", message: "Failed to load meetings." });
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchMeetings();

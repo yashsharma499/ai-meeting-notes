@@ -10,9 +10,11 @@ import FiltersBar from "../components/ActionItems/FiltersBar";
 import ActionCard from "../components/ActionItems/ActionCard";
 import EditActionCard from "../components/ActionItems/EditActionCard";
 import EmptyState from "../components/ActionItems/EmptyState";
+import { useAppStore } from "../store/useAppStore";
 
 export default function ActionItemsDashboard() {
-  const [actions, setActions] = useState([]);
+  const actions = useAppStore((s) => s.actions);
+  const setActions = useAppStore((s) => s.setActions);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
 
@@ -28,9 +30,10 @@ export default function ActionItemsDashboard() {
     try {
       const res = await getActions();
       setActions(res.data);
-    } catch {
-      setAlert({ type: "error", message: "Failed to load actions" });
-    }
+    } catch (err) {
+  console.error(err);
+  setAlert({ type: "error", message: "Failed to load actions" });
+}
     setLoading(false);
   };
 
