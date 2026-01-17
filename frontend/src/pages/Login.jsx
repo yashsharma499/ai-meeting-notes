@@ -58,11 +58,11 @@ export default function Login() {
     try {
       setLoading(true);
       const res = await loginUser({ email, password });
-      console.log("LOGIN RESPONSE DATA 👉", res.data);
+      
       const accessToken = res.data.access_token;
 
 if (!accessToken) {
-  console.error("❌ access_token missing", res.data);
+  setError("Login failed. Please try again.");
   return;
 }
 
