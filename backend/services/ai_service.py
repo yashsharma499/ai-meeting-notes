@@ -1,6 +1,5 @@
 import json
 import re
-import unicodedata
 from groq import Groq
 from config import Config
 from services.utils.text_utils import normalize_text

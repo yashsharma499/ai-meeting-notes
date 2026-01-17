@@ -1,7 +1,7 @@
 from flask import jsonify
 from bson import ObjectId
 from datetime import datetime
-import unicodedata
+
 import traceback
 
 from database.mongo import meetings_collection, actions_collection

@@ -6,7 +6,6 @@ const axiosClient = axios.create({
   timeout: 30000,
 });
 
-// Helper to refresh access token
 const refreshAccessToken = async () => {
   const refreshToken = localStorage.getItem("refresh_token");
 
@@ -15,7 +14,6 @@ const refreshAccessToken = async () => {
   try {
     const decoded = jwtDecode(refreshToken);
 
-    // Check if refresh token expired
     if (Date.now() >= decoded.exp * 1000) {
       console.warn("Refresh token expired, logging out...");
       localStorage.removeItem("refresh_token");
@@ -24,7 +22,6 @@ const refreshAccessToken = async () => {
       return null;
     }
 
-    // Call backend refresh endpoint
     const res = await axios.post(
       "/auth/refresh",
       {},
