@@ -11,7 +11,7 @@ class UpdateActionSchema(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=200)
     status: str | None = Field(None, min_length=1)
 
-@action_bp.get("/actions")
+@action_bp.get("/")
 @jwt_required()
 def get_actions_route():
     user_id = get_jwt_identity()
@@ -41,7 +41,7 @@ def get_actions_route():
         "total_pages": (total + limit - 1) // limit
     }, 200
 
-@action_bp.patch("/actions/<action_id>")
+@action_bp.patch("/<action_id>")
 @jwt_required()
 def update_action_route(action_id):
 

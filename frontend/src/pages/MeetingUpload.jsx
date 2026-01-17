@@ -42,39 +42,39 @@ export default function MeetingUpload() {
   };
 
   const handleSubmit = async () => {
-    setAlert(null);
+  setAlert(null);
 
-    if (!notes.trim()) {
-      setAlert({ type: "error", message: "Please enter meeting notes." });
-      return;
-    }
+  if (!notes.trim()) {
+    setAlert({ type: "error", message: "Please enter meeting notes." });
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const meeting = await createMeeting({
-        notes,
-        meeting_type: meetingType,
-        participants: participants
-          .split(",")
-          .map((p) => p.trim())
-          .filter(Boolean),
-      });
+    const title = meetingType + " Meeting";
 
-      await processMeeting({
-        meeting_id: meeting.data.meeting_id,
-        notes,
-      });
+    const meeting = await createMeeting({
+      title,                 // ✅ REQUIRED
+      notes: notes.trim(),   // ✅ REQUIRED
+    });
 
-      navigate("/summary", { state: { meeting_id: meeting.data.meeting_id } });
-    } catch (err) {
-      console.error(err);
-      setAlert({ type: "error", message: "Failed to process insights. Try again." });
-    } finally {
-      setLoading(false);
-    }
-  };
+    await processMeeting({
+      meeting_id: meeting.data.meeting_id,
+      notes: notes.trim(),
+    });
 
+   navigate(`/summary/${meeting.data.meeting_id}`);
+
+  } catch (err) {
+    console.error(err);
+    setAlert({ type: "error", message: "Failed to process insights. Try again." });
+  } finally {
+    setLoading(false);
+  }
+};
+
+      
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[#0a0a0c] overflow-hidden">
 

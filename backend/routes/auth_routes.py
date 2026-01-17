@@ -20,7 +20,7 @@ class LoginSchema(BaseModel):
     password: str = Field(..., min_length=6)
 
 
-@auth_bp.post("/auth/signup")
+@auth_bp.post("/signup")
 def signup_route():
     try:
         body = SignupSchema(**request.json)
@@ -47,8 +47,7 @@ def signup_route():
     create_user(name, email, password)
     return jsonify({"message": "Signup successful"}), 201
 
-
-@auth_bp.post("/auth/login")
+@auth_bp.post("/login")
 def login_route():
     try:
         body = LoginSchema(**request.json)
@@ -77,8 +76,7 @@ def login_route():
         }
     })
 
-
-@auth_bp.post("/auth/refresh")
+@auth_bp.post("/refresh")
 @jwt_required(refresh=True)
 def refresh_token_route():
     user_id = get_jwt_identity()

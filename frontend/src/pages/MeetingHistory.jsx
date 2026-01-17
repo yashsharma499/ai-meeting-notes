@@ -26,7 +26,7 @@ export default function MeetingHistory() {
   try {
     const res = await getMeetings();
 
-    const sorted = res.data.sort(
+    const sorted = res.data.data.sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
 

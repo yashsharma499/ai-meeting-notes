@@ -1,5 +1,6 @@
 
-from flask import Flask
+from flask import Flask , request
+
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
@@ -8,7 +9,7 @@ import traceback
 from routes.meeting_routes import meeting_bp
 from routes.action_routes import action_bp
 from routes.auth_routes import auth_bp
-from pymongo import MongoClient
+
 from pymongo.errors import ConnectionFailure
 from database.mongo import client as mongo_client
 from flask_limiter import Limiter
@@ -43,7 +44,7 @@ app = Flask(__name__)
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["100 per hour"]  # global rate limit
+    default_limits=["100 per hour"]  
 )
 
 ALLOWED_ORIGINS = [
@@ -51,8 +52,13 @@ ALLOWED_ORIGINS = [
     "http://localhost:5173"
 ]
 
-CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}})
-
+CORS(
+    app,
+    resources={r"/*": {"origins": ["http://localhost:5173"]}},
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 jwt_secret = os.getenv("JWT_SECRET_KEY")
 
 if not jwt_secret or len(jwt_secret) < 16:
@@ -61,10 +67,15 @@ if not jwt_secret or len(jwt_secret) < 16:
 app.config["JWT_SECRET_KEY"] = jwt_secret
 jwt = JWTManager(app)
 
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        return "", 200
 
-app.register_blueprint(meeting_bp)
-app.register_blueprint(action_bp)
-app.register_blueprint(auth_bp)
+
+app.register_blueprint(meeting_bp, url_prefix="/meetings")
+app.register_blueprint(action_bp, url_prefix="/actions")
+app.register_blueprint(auth_bp, url_prefix="/auth")
 
 @app.get("/")
 def home():

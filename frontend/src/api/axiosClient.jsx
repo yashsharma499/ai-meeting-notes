@@ -1,101 +1,70 @@
 import axios from "axios";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
+console.log("API URL 👉", API_URL);
 
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:5000",
+  baseURL: API_URL,
   timeout: 30000,
 });
 
-const refreshAccessToken = async () => {
-  const refreshToken = localStorage.getItem("refresh_token");
-
-  if (!refreshToken) return null;
-
-  try {
-    const decoded = jwtDecode(refreshToken);
-
-    if (Date.now() >= decoded.exp * 1000) {
-      console.warn("Refresh token expired, logging out...");
-      localStorage.removeItem("refresh_token");
-      localStorage.removeItem("access_token");
-      window.location.href = "/login";
-      return null;
-    }
-
-    const res = await axios.post(
-      "/auth/refresh",
-      {},
-      {
-        baseURL: import.meta.env.VITE_API_URL,
-        headers: { Authorization: `Bearer ${refreshToken}` },
-      }
-    );
-
-    const newAccessToken = res.data.access_token;
-
-    localStorage.setItem("access_token", newAccessToken);
-
-    return newAccessToken;
-  } catch (err) {
-    console.error("Refresh token invalid", err);
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("access_token");
-    window.location.href = "/login";
-    return null;
-  }
-};
-
+/* ================= REQUEST INTERCEPTOR ================= */
 axiosClient.interceptors.request.use(
-  async (config) => {
-    let accessToken = localStorage.getItem("access_token");
-
-    if (accessToken) {
-      try {
-        const { exp } = jwtDecode(accessToken);
-
-        // If access token expired → refresh it
-        if (Date.now() >= exp * 1000) {
-          console.warn("Access token expired → refreshing...");
-
-          accessToken = await refreshAccessToken();
-
-          if (!accessToken) return Promise.reject("Unable to refresh access token");
-        }
-
-        // Attach valid or newly refreshed token
-        config.headers.Authorization = `Bearer ${accessToken}`;
-      } catch (err) {
-        console.error("Invalid access token", err);
-        localStorage.removeItem("access_token");
-        window.location.href = "/login";
-        return Promise.reject("Invalid access token");
-      }
+  (config) => {
+    // Skip auth routes
+    if (
+      config.url?.includes("/auth/login") ||
+      config.url?.includes("/auth/signup")
+    ) {
+      return config;
     }
 
-    return config;
+    const token = localStorage.getItem("access_token");
+    if (!token) return config;
+
+    try {
+      const { exp } = jwtDecode(token);
+
+      // Token expired → logout
+      if (Date.now() >= exp * 1000) {
+        console.warn("Access token expired");
+        localStorage.clear();
+        window.location.href = "/login";
+        return Promise.reject("TOKEN_EXPIRED");
+      }
+
+      config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    } catch (err) {
+      console.error("Invalid token", err);
+      localStorage.clear();
+      window.location.href = "/login";
+      return Promise.reject("INVALID_TOKEN");
+    }
   },
   (error) => Promise.reject(error)
 );
 
+/* ================= RESPONSE INTERCEPTOR ================= */
 axiosClient.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    // If backend returns 401, try refreshing token again
-    if (error.response?.status === 401) {
-      console.warn("Received 401 → Attempting refresh");
+  (error) => {
+    const status = error.response?.status;
+    const url = error.config?.url || "";
 
-      const newAccess = await refreshAccessToken();
+    // 🚫 Ignore auth routes completely
+    if (
+      url.includes("/auth/login") ||
+      url.includes("/auth/signup")
+    ) {
+      return Promise.reject(error);
+    }
 
-      if (newAccess) {
-        // Retry original request with new access token
-        error.config.headers.Authorization = `Bearer ${newAccess}`;
-        return axiosClient(error.config);
-      }
-
-      // If refresh fails → logout
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      window.location.href = "/login";
+    // ❗ DO NOT auto-logout on every 401
+    // Just log it (most 401s are normal on first load)
+    if (status === 401) {
+      console.warn("401 Unauthorized from:", url);
     }
 
     return Promise.reject(error);

@@ -29,7 +29,7 @@ export default function ActionItemsDashboard() {
   const fetchActions = async () => {
     try {
       const res = await getActions();
-      setActions(res.data);
+      setActions(res.data.data);
     } catch (err) {
   console.error(err);
   setAlert({ type: "error", message: "Failed to load actions" });

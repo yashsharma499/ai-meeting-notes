@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.meeting_service import create_meeting_service, process_meeting_service
 from database.mongo import meetings_collection
 from pydantic import BaseModel, Field, ValidationError
+from bson import ObjectId
 
 meeting_bp = Blueprint("meeting_routes", __name__)
 
@@ -14,7 +15,7 @@ class ProcessMeetingSchema(BaseModel):
     meeting_id: str = Field(..., min_length=5)
     notes: str = Field(..., min_length=5)
 
-@meeting_bp.post("/meetings/create")
+@meeting_bp.post("/create")
 @jwt_required()
 def create_meeting_route():
     try:
@@ -24,7 +25,7 @@ def create_meeting_route():
 
     return create_meeting_service(body.model_dump(), get_jwt_identity())
 
-@meeting_bp.post("/meetings/process")
+@meeting_bp.post("/process")
 @jwt_required()
 def process_meeting_route():
     try:
@@ -34,7 +35,7 @@ def process_meeting_route():
 
     return process_meeting_service(body.model_dump(), get_jwt_identity())
 
-@meeting_bp.get("/meetings")
+@meeting_bp.get("/")
 @jwt_required()
 def get_meetings():
     user_id = get_jwt_identity()
@@ -58,3 +59,23 @@ def get_meetings():
         "total": total,
         "total_pages": (total + limit - 1) // limit
     }), 200
+@meeting_bp.get("/<meeting_id>")
+@jwt_required()
+def get_meeting_by_id(meeting_id):
+    user_id = get_jwt_identity()
+
+    # Validate ObjectId
+    if not ObjectId.is_valid(meeting_id):
+        return {"error": "Invalid meeting ID"}, 400
+
+    meeting = meetings_collection.find_one({
+        "_id": ObjectId(meeting_id),
+        "user_id": user_id
+    })
+
+    if not meeting:
+        return {"error": "Meeting not found"}, 404
+
+    meeting["_id"] = str(meeting["_id"])
+
+    return jsonify(meeting), 200

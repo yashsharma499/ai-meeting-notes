@@ -30,9 +30,14 @@ def validate_deadline(deadline: str, original_notes: str) -> str:
 def create_meeting_service(data, user_id):
     try:
         meeting = {
+            # REQUIRED
             "notes": data["notes"],
-            "meeting_type": data["meeting_type"],
-            "participants": data["participants"],
+
+            # OPTIONAL (SAFE)
+            "meeting_type": data.get("meeting_type", "General"),
+            "participants": data.get("participants", []),
+
+            # METADATA
             "created_at": datetime.utcnow().isoformat(),
             "summary": None,
             "key_decisions": [],

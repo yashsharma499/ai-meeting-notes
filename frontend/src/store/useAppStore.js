@@ -1,16 +1,26 @@
 import { create } from "zustand";
 
 export const useAppStore = create((set) => ({
+  // ---- STATE ----
   meetings: [],
   actions: [],
 
+  // ---- SETTERS ----
   setMeetings: (meetings) => set({ meetings }),
   setActions: (actions) => set({ actions }),
 
-  updateAction: (updated) =>
+  // ---- UPDATE SINGLE ACTION (SAFE) ----
+  updateAction: (updatedAction) =>
     set((state) => ({
-      actions: state.actions.map((a) =>
-        a._id === updated._id ? updated : a
+      actions: state.actions.map((action) =>
+        action._id === updatedAction._id ? updatedAction : action
       ),
     })),
+
+  // ---- RESET STORE (OPTIONAL, FOR LOGOUT) ----
+  resetStore: () =>
+    set({
+      meetings: [],
+      actions: [],
+    }),
 }));
