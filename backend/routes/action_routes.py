@@ -10,27 +10,30 @@ action_bp = Blueprint("action_routes", __name__)
 class UpdateActionSchema(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=200)
     status: str | None = Field(None, min_length=1)
+    owner: str | None = Field(None, min_length=1)
+    priority: str | None = Field(None, min_length=1)
+    deadline: str | None = Field(None)
 
 @action_bp.get("/")
 @jwt_required()
 def get_actions_route():
     user_id = get_jwt_identity()
 
-    # Read pagination params
+    
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
     skip = (page - 1) * limit
 
-    # Query with pagination
+    
     cursor = actions_collection.find({"user_id": user_id}).skip(skip).limit(limit)
     actions = list(cursor)
 
-    # Convert ObjectId fields to strings
+    
     for a in actions:
         a["_id"] = str(a["_id"])
         a["meeting_id"] = str(a["meeting_id"])
 
-    # Count total actions
+    
     total = actions_collection.count_documents({"user_id": user_id})
 
     return {
@@ -44,12 +47,13 @@ def get_actions_route():
 @action_bp.patch("/<action_id>")
 @jwt_required()
 def update_action_route(action_id):
+    user_id = get_jwt_identity()
 
-    # Validate ObjectId
+    
     if not ObjectId.is_valid(action_id):
         return {"error": "Invalid action ID"}, 400
 
-    # Validate input body
+   
     try:
         body = UpdateActionSchema(**request.json)
     except ValidationError as e:
@@ -57,10 +61,16 @@ def update_action_route(action_id):
 
     data = body.model_dump(exclude_none=True)
 
-    # Sanitize strings
-    if "title" in data:
-        data["title"] = data["title"].strip()
-    if "status" in data:
-        data["status"] = data["status"].strip()
+    
+    for key in data:
+        if isinstance(data[key], str):
+            data[key] = data[key].strip()
 
-    return update_action_service(action_id, data, get_jwt_identity())
+   
+    data = {k: v for k, v in data.items() if v != ""}
+
+   
+    if not data:
+        return {"error": "No valid fields to update"}, 400
+
+    return update_action_service(action_id, data, user_id)
