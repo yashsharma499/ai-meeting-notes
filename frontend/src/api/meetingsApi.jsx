@@ -9,5 +9,8 @@ export const processMeeting = (data) => {
 };
 
 export const getMeetings = () => {
-  return axiosClient.get("/meetings");
+  return axiosClient.get("/meetings/");
+};
+export const getMeetingById = (meetingId) => {
+  return axiosClient.get(`/meetings/${meetingId}`);
 };

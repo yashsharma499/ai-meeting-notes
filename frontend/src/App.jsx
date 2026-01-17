@@ -48,7 +48,7 @@ function App() {
           />
 
           <Route
-            path="/summary"
+            path="/summary/:meetingId"
             element={
               <ProtectedRoute>
                 <AISummary />

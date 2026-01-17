@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { CheckCircle, AlertTriangle, Info, XCircle, X } from "lucide-react";
 
 export default function Alert({

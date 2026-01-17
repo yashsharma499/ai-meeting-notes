@@ -15,12 +15,8 @@ export default function MeetingModal({ meeting, onClose }) {
   const navigate = useNavigate();
 
   const handleViewFullSummary = () => {
-    navigate("/summary", {
-      state: {
-        meeting_id: meeting._id,
-      },
-    });
-  };
+  navigate(`/summary/${meeting._id}`);
+};
 
   const hasSummary =
     typeof meeting.summary === "string" && meeting.summary.trim().length > 0;
