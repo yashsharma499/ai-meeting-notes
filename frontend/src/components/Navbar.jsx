@@ -19,11 +19,14 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const token = localStorage.getItem("token");
+  /* ✅ FIX: use correct token key */
+  const token = localStorage.getItem("access_token");
   const user = JSON.parse(localStorage.getItem("user"));
 
+  /* ✅ FIX: clear correct keys */
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
     window.location.href = "/login";
   };
@@ -83,7 +86,10 @@ export default function Navbar() {
               }`}
             >
               <span className="relative z-10 flex items-center gap-2">
-                <link.icon size={16} className={isActive(link.path) ? "text-white" : "text-gray-500"} />
+                <link.icon
+                  size={16}
+                  className={isActive(link.path) ? "text-white" : "text-gray-500"}
+                />
                 {link.name}
               </span>
               {isActive(link.path) && (
@@ -99,7 +105,6 @@ export default function Navbar() {
 
         {/* DESKTOP AUTH SECTION */}
         <div className="hidden md:flex items-center gap-4 ml-6">
-
           {!token ? (
             <>
               <Link
@@ -120,13 +125,11 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {/* USER NAME */}
               <div className="flex items-center gap-2 text-white font-semibold bg-white/5 py-2 px-4 rounded-xl border border-white/10 backdrop-blur-md">
                 <UserCircle size={20} className="text-indigo-400" />
                 {user?.name || "User"}
               </div>
 
-              {/* LOGOUT */}
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-500 transition flex items-center gap-2"
@@ -136,7 +139,6 @@ export default function Navbar() {
               </button>
             </>
           )}
-
         </div>
 
         {/* MOBILE MENU BUTTON */}
@@ -179,7 +181,11 @@ export default function Navbar() {
                         : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    <div className={`p-2 rounded-lg ${isActive(link.path) ? "bg-white/20" : "bg-white/5"}`}>
+                    <div
+                      className={`p-2 rounded-lg ${
+                        isActive(link.path) ? "bg-white/20" : "bg-white/5"
+                      }`}
+                    >
                       <Icon size={20} />
                     </div>
                     {link.name}
@@ -219,7 +225,6 @@ export default function Navbar() {
                   Logout
                 </button>
               )}
-
             </div>
           </motion.div>
         )}

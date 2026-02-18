@@ -11,8 +11,7 @@ import {
   Lock, 
   UserPlus, 
   AlertCircle, 
-  ArrowRight,
-  Sparkles
+  ArrowRight
 } from "lucide-react";
 
 export default function Signup() {

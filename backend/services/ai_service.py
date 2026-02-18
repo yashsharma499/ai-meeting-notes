@@ -1,17 +1,13 @@
 import json
 import re
-import unicodedata
 from groq import Groq
 from config import Config
+from services.utils.text_utils import normalize_text
+
 
 groq_client = Groq(api_key=Config.GROQ_API_KEY)
 
-def normalize_text(text):
-    if not text:
-        return ""
-    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
-    text = text.replace("–", "-").replace("—", "-").replace("−", "-")
-    return text.strip()
+
 
 SYSTEM_PROMPT = """
 You are an AI Meeting Intelligence Engine for a product called 
@@ -191,7 +187,7 @@ Return ONLY valid JSON.
 """
 
     response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=Config.GROQ_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": USER_PROMPT}
