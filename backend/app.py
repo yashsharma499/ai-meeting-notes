@@ -54,10 +54,8 @@ ALLOWED_ORIGINS = [
 
 CORS(
     app,
-    resources={r"/*": {"origins": ["http://localhost:5173"]}},
-    supports_credentials=True,
-    allow_headers=["Content-Type", "Authorization"],
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+    origins=ALLOWED_ORIGINS,
+    supports_credentials=True
 )
 jwt_secret = os.getenv("JWT_SECRET_KEY")
 
@@ -67,10 +65,6 @@ if not jwt_secret or len(jwt_secret) < 16:
 app.config["JWT_SECRET_KEY"] = jwt_secret
 jwt = JWTManager(app)
 
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        return "", 200
 
 
 app.register_blueprint(meeting_bp, url_prefix="/meetings")
